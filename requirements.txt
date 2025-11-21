@@ -1,4 +1,4 @@
-# Runtime dependencies for LLM Embedded for Robots in ROS2
+# Runtime dependencies for LLM Embedded
 
 # LLM inference
 llama-cpp-python==0.3.15
@@ -19,7 +19,6 @@ torch==2.8.0
 torchaudio==2.8.0
 onnx==1.18.0
 onnxruntime==1.22.1
-#ONLY-NEW-BRANCH
 setuptools-rust
 openai-whisper
 

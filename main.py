@@ -49,7 +49,7 @@ class OctybotAgent:
             self.tts.play_audio_with_amplitude(get_audio)
     
     def stop(self):
-        self.audio_listener.delete()
+        self.audio_listener.terminate()
         self.tts.stop_tts()
 
     

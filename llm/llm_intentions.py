@@ -37,20 +37,20 @@ def split_and_prioritize(text: str, general_rag) -> List[Dict[str, Any]]:
     if not clauses:
         clauses.append(norm_text(text, False))
 
-    accions = []
+    actions = []
     for c in clauses:
         print(c, flush=True)
         # 1) Respuestas cortas por GENERAL_RAG si hay alta confianza
         var = best_hit(general_rag.lookup(c))
         if var.get('answer') and var.get('score', 0.0) >= FUZZY_LOGIC_ACCURACY_GENERAL_RAG:
-            accions.append(("first", "rag", {"data": var['answer'].strip()}))
+            actions.append(("first", "rag", {"data": var['answer'].strip()}))
             continue
         
         # 2) Fallback directo a General (LLM)
-        accions.append(("second", "general", {"data": c}))
+        actions.append(("second", "general", {"data": c}))
 
     # Primero cortas, luego largas (orden estable preservado)
     print(clauses, flush=True)
-    print(accions, flush=True)
-    accions.sort(key=lambda x: 0 if x[0] == "first" else 1)
-    return [{"kind": k, "params": p} for _, k, p in accions]
+    print(actions, flush=True)
+    actions.sort(key=lambda x: 0 if x[0] == "first" else 1)
+    return [{"kind": k, "params": p} for _, k, p in actions]
