@@ -102,16 +102,18 @@ class TTS:
         self.pa = pyaudio.PyAudio()
 
         if self.stream is None:
-            self.stream = self.pa.open(format=pyaudio.paInt16,
-                         channels=1,
-                         rate=self.sample_rate,
-                         output=True)
+            self.stream = self.pa.open(format=pyaudio.paInt16, channels=1, rate=self.sample_rate, output=True)
 
     def stop_tts(self):
         """Stop the stream"""
-        self.stream.stop_stream()
-        self.stream.close()
+
+        if self.stream is not None:
+            self.stream.stop_stream()
+            self.stream.close()
+            self.stream = None
+
         self.pa.terminate()
+        self.pa = None
         
  #———— Example Usage ————
 if "__main__" == __name__:
