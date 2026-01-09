@@ -26,11 +26,13 @@ class TTS:
             normalize_audio=False, # use raw audio from voice
         )
 
+        try:
+            self.pa = pyaudio.PyAudio()
+        except Exception as e:
+            self.log.error(f"Error al iniciar PyAudio: {e}")
+            self.pa = None
 
-        self.pa = None
         self.stream = None
-        
-
         self.log.info("Text-To-Speech Inicializado")
 
     def synthesize(self, text: str):
@@ -75,6 +77,10 @@ class TTS:
 
         self.start_stream()
 
+        if self.stream is None:
+            self.log.error("No se pudo iniciar el stream de audio")
+            return
+
         # Convert float32 [-1..1] to int16
         audio_int16 = np.clip(audio_data * 32767.0, -32767.0, 32767.0).astype(np.int16)
 
@@ -86,7 +92,11 @@ class TTS:
         while idx < total_frames:
             chunk_end = min(idx + chunk_size, total_frames)
             chunk = audio_int16[idx:chunk_end]
-            self.stream.write(chunk.tobytes())
+            try:
+                self.stream.write(chunk.tobytes())
+            except OSError as e:
+                self.log.error(f"Error escribiendo el stream de audio: {e}")
+                break
 
             if amplitude_callback:
                 # amplitude = mean absolute value
@@ -94,15 +104,20 @@ class TTS:
                 amplitude_callback(amplitude)
 
             idx += chunk_size
+
         self.stop_tts()
         return True
 
     def start_stream(self):
         """ Start the audio stream if not already started."""
-        self.pa = pyaudio.PyAudio()
+        if self.pa is None:
+            self.pa = pyaudio.PyAudio()
 
         if self.stream is None:
-            self.stream = self.pa.open(format=pyaudio.paInt16, channels=1, rate=self.sample_rate, output=True)
+            try:
+                self.stream = self.pa.open(format=pyaudio.paInt16, channels=1, rate=self.sample_rate, output=True)
+            except Exception as e:
+                self.log.error(f"Fallo al abrir stream de salida: {e}")
 
     def stop_tts(self):
         """Stop the stream"""
@@ -111,9 +126,13 @@ class TTS:
             self.stream.stop_stream()
             self.stream.close()
             self.stream = None
-
-        self.pa.terminate()
-        self.pa = None
+    def terminate(self):
+        """ Call this when shutting down the whole app"""
+        self.stop_tts()
+        if self.pa is not None:
+            self.pa.terminate()
+            self.pa = None
+            self.log.info("Py audio terminado correctamente")
         
  #———— Example Usage ————
 if "__main__" == __name__:
@@ -132,6 +151,6 @@ if "__main__" == __name__:
             tts.play_audio_with_amplitude(get_audio)
 
     except KeyboardInterrupt:
-        tts.stop_tts()
+        tts.terminate()
         print(" Saliendo")
         exit(0)

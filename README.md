@@ -30,8 +30,8 @@ Python package that integrates a local Large Language Model with a fully offline
 
 ```bash
 # Clone the repository
-git clone https://github.com/JossueE/Local-LLM-for-Robots.git 
-cd Local-LLM-for-Robots
+git clone https://github.com/TheBIGduke/Local-LLM.git
+cd Local-LLM
 ```
 
 ### Setup
@@ -104,7 +104,7 @@ All general questions and answers are stored in `config/data/general_rag.json`. 
 <h2 id="quick-start">Quick Start</h2>
 
 ```bash
-cd Local-LLM-for-Robots 
+cd Local-LLM
 source .venv/bin/activate
 ```
 

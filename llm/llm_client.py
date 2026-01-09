@@ -43,6 +43,10 @@ class LLM:
 
     def answer_general(self, user_prompt: str) -> str:
         """ Answer a general question with the LLM """
+
+        if not USE_LLM:
+            return "El LLM está desactivado en la configuración"
+
         self.ensure()
         general_system = GENERAL_SYSTEM_PROMPT
         messages = [
