@@ -19,7 +19,6 @@ class SpeechToText:
 
         # List of Whisper common hallucinations
         self.hallucinations = [
-            "transcripción vacía"
             "la universidad",
             "subtítulos realizados por",
             "amara.org",

@@ -476,7 +476,8 @@
     },
     {
       "triggers": [
-        "**error_audio_retry**"
+        "**error_audio_retry**",
+        "Transcripción vacía"
       ],
       "answer": "No te escuché muy bien, ¿puedes repetir tu pregunta?"
     }
