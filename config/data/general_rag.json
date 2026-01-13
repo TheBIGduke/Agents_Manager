@@ -473,6 +473,12 @@
         "cómo te ha ido la vida" 
       ],
       "answer": "¡Funcionando a la perfección! Mis circuitos están listos para responder todas tus preguntas sobre robótica y tecnología."
+    },
+    {
+      "triggers": [
+        "**error_audio_retry**"
+      ],
+      "answer": "No te escuché muy bien, ¿puedes repetir tu pregunta?"
     }
   ]
 }

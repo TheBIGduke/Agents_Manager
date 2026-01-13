@@ -3,8 +3,9 @@ from pathlib import Path
 
 import logging
 import numpy as np
-
 import whisper
+from difflib import SequenceMatcher
+
 from config.settings  import SAMPLE_RATE_STT, LANGUAGE, SELF_VOCABULARY_STT, DEVICE_SELECTOR_STT
 
 class SpeechToText:
@@ -16,6 +17,22 @@ class SpeechToText:
 
         self.model = whisper.load_model(model_name, download_root = model_path.parent, device=DEVICE_SELECTOR_STT)
 
+        # List of Whisper common hallucinations
+        self.hallucinations = [
+            "la universidad",
+            "subtítulos realizados por",
+            "amara.org",
+            "gracias por ver",
+            "thanks for watching",
+            "suscríbete",
+            "dale like",
+            "copyright",
+            "todos los derechos reservados",
+            "hacé clic en el botón",
+            "regístrate",
+            "No me puedo hablar de lo que es"
+        ]
+
     
     def worker_loop(self, audio_bytes: bytes) -> Optional[str | None]:
         """With this we can see if we recieve text or none"""
@@ -23,7 +40,11 @@ class SpeechToText:
             return None
         try:
             text = self.stt_from_bytes(audio_bytes)
-            if text:  
+            if text:
+                if self.check_hallucinations(text):
+                    self.log.warning(f"Hallucination detected: '{text}'. Triggering retry")
+                    return "**error_audio_retry**" # Key for RAG
+                
                 self.log.info(f"Se transcribió = {text}")
                 return text
             else:
@@ -32,6 +53,23 @@ class SpeechToText:
             
         except Exception as e:
             self.log.info(f"Error en STT: {e}")
+
+
+    def check_hallucinations(self, text: str) -> bool:
+        """
+        Verify if the text is a valid transcription or a hallucination.
+        Uses a combination of substring presence and fuzzy matching ratio.
+        """
+        text_lower = text.lower().strip()
+
+        for h in self.hallucinations:
+            if h in text_lower:
+                # Calculate similarity ratio
+                ratio = SequenceMatcher(None, h, text_lower).ratio()
+                if ratio > 0.6 or (len(text_lower) > len(h) * 1.5):
+                    return True
+        return False
+
 
     def stt_from_bytes (self, audio_bytes: bytes) -> Optional[str]:
         """
@@ -66,7 +104,9 @@ class SpeechToText:
             )
 
         return(result["text"])or None
-    
+
+
+
  #———— Example Usage ————
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="[%(levelname)s %(asctime)s] [%(name)s] %(message)s")
