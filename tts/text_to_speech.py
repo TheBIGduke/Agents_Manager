@@ -12,7 +12,7 @@ from config.settings import  SAMPLE_RATE_TTS, SAVE_WAV_TTS, PATH_TO_SAVE_TTS, NA
 class TTS:
     def __init__(self, model_path:str, model_path_conf:str):
         print("-> Loading Whisper TTS model...")
-        self.log = logging.getLogger("[Text-to-Speech]")    
+        self.log = logging.getLogger("Text-to-Speech")    
         self.voice = PiperVoice.load(model_path = model_path,config_path = model_path_conf )
         self.sample_rate = SAMPLE_RATE_TTS
         self.count_of_audios = 0

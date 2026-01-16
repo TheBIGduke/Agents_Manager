@@ -53,7 +53,7 @@ class OctybotAgent:
     def stop(self):
         self.audio_listener.terminate()
         self.tts.stop_tts()
-        self.log.warning("System Stopped.")
+        self.log.warning("System Stopped")
 
 
  #———— Example Usage ————-
@@ -63,7 +63,7 @@ if "__main__" == __name__:
         print("\n" + "="*50)
         print(" Octybot Virtual Agent")
         print(" Say 'Ok Robot' to start...")
-        print(" Press Ctrl+C to exit.")
+        print(" Press Ctrl+C to exit")
         print("="*50 + "\n")
         
         while True:
