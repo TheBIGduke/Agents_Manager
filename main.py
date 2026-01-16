@@ -1,5 +1,5 @@
 import logging
-from utils.utils import LoadModel
+from utils.utils import LoadModel, configure_logging
 from stt.wake_word import WakeWord
 from stt.audio_listener import AudioListener
 from stt.speech_to_text import SpeechToText
@@ -9,7 +9,8 @@ from tts.text_to_speech import TTS
 
 class OctybotAgent:
     def __init__(self):
-        self.log = logging.getLogger("Octybot")
+        configure_logging() # <--- Initialize color logging
+        self.log = logging.getLogger("System")
         model = LoadModel()
         
         #Speech-to-Text
@@ -26,7 +27,7 @@ class OctybotAgent:
         # Start the audio stream
         self.audio_listener.start_stream()
         
-        self.log.info("Octy Agent Listo")
+        self.log.info("System Ready & Listening...")
     
 
     def main(self):
@@ -52,23 +53,21 @@ class OctybotAgent:
     def stop(self):
         self.audio_listener.terminate()
         self.tts.stop_tts()
-
-
+        self.log.warning("System Stopped")
 
 
  #———— Example Usage ————-
 if "__main__" == __name__:
-    logging.basicConfig(level=logging.INFO, format="[%(levelname)s %(asctime)s] [%(name)s] %(message)s")
-
     try:
         llm = OctybotAgent()
-        print("Hola soy tu Agente virtual Octy")
-        print("Prueba a decir 'ok robot' y darme una instrucción - Presiona (Ctrl+C para salir):")
-        print("(Ejemplos: '¿Quién eres?', '¿Cuándo fue la Independencia de México?')")
+        print("\n" + "="*50)
+        print(" Octybot Virtual Agent")
+        print(" Say 'Ok Robot' to start...")
+        print(" Press Ctrl+C to exit")
+        print("="*50 + "\n")
+        
         while True:
-            print("> Quieres preguntar algo: ")
             llm.main() 
     except KeyboardInterrupt:
         llm.stop()
-        print("Saliendo")
         exit(0)

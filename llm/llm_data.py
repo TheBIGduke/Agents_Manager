@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import List, Dict, Any
 from difflib import SequenceMatcher
 from rapidfuzz import fuzz as rf_fuzz
@@ -9,12 +10,13 @@ from llm.llm_intentions import norm_text
 
 class GENERAL_RAG:
     def __init__(self, path: str):
+        self.log = logging.getLogger("LLM_Data")
         self.items: List[Dict[str,str]] = []
         self.load(path)
     
     def load(self, path: str) -> None:
         """ Load the GENERAL_RAG from a JSON file or line-separated JSON objects """
-        print("[llm_data] Cargando GENERAL_RAG", flush=True)
+        self.log.info("Loading GENERAL_RAG...")
         try:
             with open(path, "r", encoding="utf-8") as f:
                 txt = f.read().strip()
@@ -35,12 +37,13 @@ class GENERAL_RAG:
                 elif isinstance(obj, list):
                     items = obj
                 self.items = items
+                self.log.info(f"Loaded {len(self.items)} RAG entries ")
             except json.JSONDecodeError:
                 self.items = [json.loads(line) for line in txt.splitlines() if line.strip()]
-                print("[llm_data] No se pudo cargar", flush=True)
+                self.log.warning("JSON format issue, attempted line-by-line load.")
         except Exception as e:
             self.items = []
-            print("[llm_data] No se pudo abrir", flush=True)
+            self.log.error(f"Could not open RAG file: {e}")
     
     def lookup(self, query: str) -> Dict[str, Any]:
         """ Simple exact or fuzzy match in the GENERAL_RAG. Returns dict with 'answer' and 'score' (0.0–1.0) """
@@ -55,7 +58,8 @@ class GENERAL_RAG:
             s = fuzzy
             if s > best_s:
                 best, best_s = item, s
-        print(f"[llm_data] GENERAL_RAG lookup '{query}' -> '{best.get('a','') if best else ''}' ({best_s})", flush=True)
+        
         if best and best_s >= FUZZY_LOGIC_ACCURACY_GENERAL_RAG:
+            self.log.info(f"Match: '{query}' -> '{best.get('a','')[:30]}...' ({best_s:.2f})")
             return {"answer": best.get('a',''), "score": round(best_s,3)}
         return {"answer":"","score": round(best_s,3)}

@@ -1,8 +1,14 @@
 from __future__ import annotations
 import logging, json
-import webrtcvad
-import vosk
 
+# --- SILENCE WEBRTCVAD WARNING ---
+import warnings
+# Suppress the specific pkg_resources warning from webrtcvad
+warnings.filterwarnings("ignore", message=".*pkg_resources is deprecated.*")
+import webrtcvad
+# ---------------------------------
+
+import vosk
 import threading
 from collections import deque
 
@@ -29,10 +35,16 @@ class WakeWord:
         self.variants = VARIANTS_WAKE_WORD
         
         #State Machine 
-        self.on_say = (lambda s: print(f"[Wake_word] {s}"))
+        # --- CHANGED FROM DEBUG TO INFO ---
+        self.on_say = (lambda s: self.log.info(f"{s}"))
+        # ----------------------------------
 
         grammar = json.dumps(self.variants, ensure_ascii=False)
-        model_path = model_path
+        
+        # --- SILENCE VOSK LOGS ---
+        # Sets Vosk C++ library log level to warnings/errors only
+        vosk.SetLogLevel(-1) 
+        
         self.model = vosk.Model(model_path)
         self.rec = vosk.KaldiRecognizer(self.model, self.sample_rate, grammar)
 
@@ -64,21 +76,7 @@ class WakeWord:
             webbrowser.open(Path("avatar/OctoV.html").resolve().as_uri(), new=0, autoraise=True)
 
     def wake_word_detector(self, frame: bytes) -> None | bytes:
-        """Process one 10 ms PCM int16 mono frame for wake-word detection.
-
-        - Uses WebRTC VAD to detect speech vs. silence.
-        - **Silence Handling:** If silence persists beyond the threshold (`silence_frames_to_drain`):
-            * If the wake word was previously confirmed (`listening_confirm`), it returns the buffered audio (drains).
-            * If the wake word was only tentatively detected (`listening`) but not confirmed, it clears the buffer and stops listening.
-        - **Speech Processing:** Feeds the frame to the Vosk recognizer.
-            * **Full Result:** If a full wake word is detected, it sets `listening_confirm` to True, locking the system into recording mode until silence is heard.
-            * **Partial Result:** If a partial match is found, it sets `listening` to True (tentative state) and begins buffering audio. It tracks `partial_hits` to debounce false positives.
-        - **Buffering:** Automatically adds speech frames to the buffer if the system is in a listening state.
-        
-        Returns:
-            bytes: The complete audio buffer if a recording session finishes (silence after confirmation).
-            None: If still listening or no wake word detected.
-        """
+        """Process one 10 ms PCM int16 mono frame for wake-word detection."""
         flag = True if self.vad.is_speech(frame, self.sample_rate) else False
 
         if (self.listening or self.listening_confirm) and flag: #If I'm listening or If I got a confirmation i save the info
@@ -94,10 +92,8 @@ class WakeWord:
                 self.partial_hits = 0
                 send_mode_sync(mode = "TTS", as_json=False) if AVATAR else None
                 if self.listening_confirm and self.size > 0: # If I have the wake_word comfirm and I have something
-                    print(self.size, flush=True)
-                    print(MIN_SILENCE_MS_TO_DRAIN_STT, flush=True)
                     return self.buffer_drain()
-                self.on_say("Hubo una detección pero no se confirmó, limpiando buffer")
+                self.on_say("Detection wasn't confirmed, clearing buffer...")
                 self.buffer_clear()
                 return
         
@@ -105,11 +101,10 @@ class WakeWord:
             result = json.loads(self.rec.Result() or "{}")
             text = (result.get("text") or "").lower().strip()
             if text and self.matches_wake(text):
-                self.log.info(f"[FULL] Wake word: {text!r}")
+                self.log.info(f"Wake word detected: '{text}'")
                 if not self.listening_confirm:           
                     self.listening_confirm = True
                     self.listening = True   
-                    print("Confirmo Grabación")
                 self.partial_hits = 0
                 return
             self.partial_hits = 0
@@ -121,14 +116,13 @@ class WakeWord:
                     if not self.listening: 
                         self.listening = True
                         send_mode_sync(mode = "USER", as_json=False) if AVATAR else None
-                        print("Empiezo a Grabar (primer partial)")
                         drained = self.buffer_add(frame) if flag else None
                         if drained is not None:
                             return drained
                     self.partial_hits += 1
 
                     if self.partial_hits >= self.required_hits:
-                        self.log.info(f"[PARTIAL] Wake word: {partial!r}")
+                        self.log.info(f"Partial Match: {partial!r}")
                         self.partial_hits = 0
                         return
                 else:
@@ -149,7 +143,6 @@ class WakeWord:
 
     def buffer_clear(self) -> None:
         """ Clear the audio buffer and reset flags. """
-        print("Limpiando Buffer")
         self.listening = False
         self.listening_confirm = False
         with self.lock:
@@ -161,13 +154,12 @@ class WakeWord:
         Return all buffered audio (as a single bytes object) and clear the buffer.
         Operates atomically under `self.lock`.
         """
-        self.on_say("Envío Información a STT")
+        self.log.info("Audio sent to STT")
 
         with self.lock:
             data = b"".join(self.buffer)
             self.buffer.clear()
 
-        print("Limpio el Buffer")
         self.size = 0
         self.listening = False
         self.listening_confirm = False
@@ -186,10 +178,13 @@ class WakeWord:
             if self.norm(v) in t:
                 return True
         return False
-        
+
+
+
  #———— Example Usage ————
 if "__main__" == __name__:
-    logging.basicConfig(level=logging.INFO, format="[%(levelname)s %(asctime)s] [%(name)s] %(message)s")
+    from utils.utils import configure_logging
+    configure_logging()
 
     from utils.utils import LoadModel
     from stt.audio_listener import AudioListener
@@ -200,8 +195,8 @@ if "__main__" == __name__:
     audio_listener.start_stream()
 
     try: 
-        print("Este es el nodo de prueba del Wake Word con Audio Listener 🔊, si tiene una detección parcial dirá [PARTIAL], si es completa [FULL]\n" \
-    "La Palabara de activación es 'ok Robot' - Presione Ctrl+C para salir\n")
+        print("Este es el nodo de prueba del Wake Word con Audio Listener")
+        print("La Palabara de activación es 'ok Robot' - Presione Ctrl+C para salir\n")
         while True:
             result = audio_listener.read_frame(ww.frame_samples)
             n_result = ww.wake_word_detector(result)

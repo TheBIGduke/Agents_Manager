@@ -13,15 +13,15 @@ from config.settings  import (
 class SpeechToText:
     def __init__(self, model_path:str, model_name:str) -> None:
         
-        self.log = logging.getLogger("Speech_To_Text")    
+        self.log = logging.getLogger("STT")    
 
         model_path = Path(model_path)
 
         self.model = whisper.load_model(model_name, download_root = model_path.parent, device=DEVICE_SELECTOR_STT)
         
 
-        # --- This patch is to avoid a bug generated from Whisper, it helps to catch the generally know allcination outputs
-        # and redirect them as another output to keep the interaction as fluid as possible ---
+        # --- This patch is to avoid a bug from Whisper, it helps to catch commonly known hallucination outputs
+        # and redirect them to prevent cascading errors and keep the interaction fluid ---
         # Common Whisper hallucinations to filter out
         self.hallucinations = [
             "la universidad",
@@ -48,18 +48,18 @@ class SpeechToText:
             if text:
                 # Check for Hallucinations
                 if self.check_hallucination(text):
-                    self.log.warning(f"Hallucination detected: '{text}'. Triggering retry.")
+                    self.log.warning(f"Hallucination detected: '{text}', Triggering retry")
                     return "**error_audio_retry**" # Magic Key for RAG
 
-                self.log.info(f"Se transcribió = {text}")
+                self.log.info(f"STT transcribed = {text}")
                 return text
             else:
                 # Handle Empty Transcription (Audio detected but no words found)
-                self.log.info(f"Transcripción vacía. Triggering retry.")
+                self.log.info(f"Empty transcription, Triggering retry")
                 return "**error_audio_retry**" 
             
         except Exception as e:
-            self.log.error(f"Error en STT: {e}")
+            self.log.error(f"Error in STT module: {e}")
             return None
 
 
@@ -105,7 +105,7 @@ class SpeechToText:
         x = pcm.astype(np.float32) / 32768.0
 
         if SAMPLE_RATE_STT != 16000:
-            self.log.warning(f"Whisper Solo Funciona a 16 Khz, estás enviando información a {SAMPLE_RATE_STT}hz")
+            self.log.warning(f"Whisper only works at 16 Khz, info is being sent at {SAMPLE_RATE_STT}hz")
 
         result = self.model.transcribe(
             x,

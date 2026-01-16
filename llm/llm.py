@@ -20,12 +20,13 @@ class LlmAgent:
         self.llm = LLM(model_path =  model_path)
         self.router = Router(self.llm)
         
-        self.log.info("LLM initialized - Octybot listo ✅ ")
+        self.log.info("LLM initialized")
 
-    def ask(self, text: str) -> None:
+    def ask(self, text: str) -> List[str]:
         """ Process a user input:
         - classify into actions (general/rag)
-        - execute via router.handle()"""
+        - execute via router.handle()
+        - return list of responses """
         outs: List[str] = []
         if not isinstance(text, str) or not text.strip():
             text = "No tengo mensaje para procesar."
@@ -43,7 +44,7 @@ class LlmAgent:
                 outs.append(ans)
 
         except Exception as e:
-            self.log.exception("Error procesando ask()")
+            self.log.exception("Error while processing ask()")
             ans = json.dumps({"error": type(e).__name__, "msg": str(e)}, ensure_ascii=False)
         return outs
 
