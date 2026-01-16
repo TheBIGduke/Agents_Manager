@@ -120,7 +120,7 @@ class WakeWord:
                     self.partial_hits += 1
 
                     if self.partial_hits >= self.required_hits:
-                        self.log.debug(f"Partial Match: {partial!r}")
+                        self.log.info(f"Partial Match: {partial!r}")
                         self.partial_hits = 0
                         return
                 else:

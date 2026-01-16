@@ -23,13 +23,13 @@ LEVEL_COLORS = {
 
 # Module Colors (To differentiate sources)
 MODULE_COLORS = {
-    "System": "\033[38;5;93m",          # Purple
+    "System": "\033[38;5;93m",         # Purple
     "Wake_Word": "\033[38;5;213m",      # Pink
-    "STT": "\033[38;5;85m",             # Turquoise
+    "STT": "\033[38;5;85m",  # Turquoise
     "LLM": "\033[96m",                  # Cyan
     "LLM_Data": "\033[36m",             # Cyan dim
-    "TTS": "\033[38;5;178m",            # Gold
-    "Audio_Listener": "\033[38;5;208m", # Orange
+    "TTS": "\033[38;5;178m", # Gold
+    "Audio_Listener": "\033[38;5;208m",  # Orange
 }
 
 class ColoredFormatter(logging.Formatter):
@@ -52,10 +52,41 @@ class ColoredFormatter(logging.Formatter):
         # Format: [TIME] [MODULE] LEVEL: Message
         return f"{GRAY}{asctime}{RESET} {module_name} {level_name}: {message}"
 
+class WarningLogRouter(logging.Filter):
+    """
+    Intercepts specific warnings, routes them to the correct logger, 
+    and replaces the message with a clean, specific string.
+    """
+    def filter(self, record):
+        msg = record.getMessage()
+        
+        # 1. Route Whisper CPU warning to 'STT' and clean message
+        if "Performing inference on CPU when CUDA is available" in msg:
+            record.name = "STT"
+            record.msg = "Performing inference on CPU when CUDA is available"
+            record.args = () # Clear any formatting args
+            
+        # 2. Route Numba TBB warning to 'System' and clean message
+        elif "The TBB threading layer requires TBB version" in msg or "he TBB threading layer requires" in msg:
+            record.name = "System"
+            record.msg = "The TBB threading layer requires TBB version 2021 update 6 or later i.e., TBB_INTERFACE_VERSION >= 12060. Found TBB_INTERFACE_VERSION = 12050. The TBB threading layer is disabled."
+            record.args = () # Clear any formatting args
+
+        # 3. Route Llama context warning to 'LLM_Data' and set as INFO
+        elif "llama_context" in msg:
+            record.name = "LLM_Data"
+            record.levelno = logging.INFO
+            record.levelname = "INFO"
+            
+        return True
+
 def configure_logging():
     """Sets up the global logging configuration with colors."""
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(ColoredFormatter("%(asctime)s %(name)s %(levelname)s %(message)s", datefmt="%H:%M:%S"))
+    
+    # Add the router filter to the handler
+    handler.addFilter(WarningLogRouter())
     
     # Get root logger
     root_logger = logging.getLogger()
@@ -66,6 +97,10 @@ def configure_logging():
         root_logger.handlers.clear()
         
     root_logger.addHandler(handler)
+    
+    # --- CAPTURE WARNINGS ---
+    # Redirect Python warnings (Whisper/Numba) to the logging system
+    logging.captureWarnings(True)
     
     # Suppress noisy libraries
     logging.getLogger("httpx").setLevel(logging.WARNING)
