@@ -3,8 +3,8 @@
 [![Python](https://img.shields.io/badge/Python-3.10+-yellow.svg)](https://www.python.org/)
 
 
-Python package for fully offline fuzzy retrieval (fuzzy_search-style) with an optional speech pipeline.
-It provides fast, robust approximate matching over a local knowledge base, with improved pattern matching, stronger error handling, and a cleaner, modular codebase. The project is organized by modules (Wake Word, STT, Fuzzy Search, TTS), each living in its own folder with dedicated documentation
+Python package for fully offline fuzzy retrieval (fuzzy_search-style) with an optional speech pipeline. Additionally, user can select the "brain" for the agent either local or online by cloning submodules.<br> 
+It provides fast, robust approximate matching over a local knowledge base, with improved pattern matching, stronger error handling, and a cleaner, modular codebase. The project is organized by modules (Wake Word, STT, Fuzzy Search, __optionally an agent__, TTS), each living in its own folder with dedicated documentation.
 
 ---
 
@@ -14,6 +14,7 @@ It provides fast, robust approximate matching over a local knowledge base, with 
 - [Configuration](#configuration)
 - [Quick Start](#quick-start)
 - [Usage](#usage)
+- [Contributing](#contributing)
 
 ---
 
@@ -24,15 +25,15 @@ It provides fast, robust approximate matching over a local knowledge base, with 
 
 ### Prerequisites
 
-- Git, CMake
+- Git, CMake, ffmpeg
 - Optional: NVIDIA CUDA for GPU acceleration
 
 ### Cloning this Repository
 
 ```bash
 # Clone the repository
-git ...
-cd Agents_Manager
+git clone https://springlabsdevs.net/mecatronica/robotica/agents_manager.git
+cd agents_manager
 ```
 
 ### Setup
@@ -75,7 +76,7 @@ To verify models were correctly downloaded or to download models:
 .venv/bin/python utils/download.py
 ```
 
-The script installs everything into your cache directory (`~/.cache/octy`).
+The script installs everything into your cache directory (`~/.cache/agents_manager`).
 
 ---
 
@@ -101,7 +102,7 @@ All general questions and answers are stored in `config/data/general_rag.json`. 
 <h2 id="quick-start">Quick Start</h2>
 
 ```bash
-cd Agents_Manager
+cd agents_manager
 source .venv/bin/activate
 ```
 
@@ -133,15 +134,23 @@ python -m fuzzy_search.fuzzy_search
 
 ```bash
 # To test Speech-to-Text 
-# Remember to Say "ok Robot"
+# Remember to say "ok Robot"
 python -m stt.speech_to_text
 ```
+
+To test wake_word only:
+```bash
+# Remember to say "ok Robot"
+python -m stt.wake_word
+```
+
 
 **Text to Speech Module:**
 
 ```bash
 python -m tts.text_to_speech
 ```
+
 
 > [!TIP]
 > If you encounter issues launching modules, try running with the virtual environment explicitly:
@@ -184,7 +193,7 @@ Your input text is normalized (`norm_text`) before matching (lowercase, accents 
 
 ##### What you should see
 
-- **fuzzy_search loaded:** Logs like `[Diffuse_Search] Loading GENERAL_RAG...` followed by `Loaded 395 fuzzy_search entries`.
+- **fuzzy_search loaded:** Logs like `[Diffuse_Search] Loading GENERAL_QA...` followed by `Loaded 395 fuzzy_search entries`.
 - **TTS initialized:** `[TTS] Loading whisper TTS model...` then `Text To Speech initialized.`
 - **System ready:** `[System] System Ready & Listening...` plus the banner:
     - `Octybot Virtual Agent`
@@ -229,3 +238,5 @@ Contributions are welcome. Please fork the repository and submit a pull request.
 6. Open a Pull Request.
 
 ---
+
+

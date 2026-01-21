@@ -3,7 +3,7 @@ from utils.utils import LoadModel, configure_logging
 from stt.wake_word import WakeWord
 from stt.audio_listener import AudioListener
 from stt.speech_to_text import SpeechToText
-from fuzzy_search.fuzzy_search import GENERAL_RAG
+from fuzzy_search.fuzzy_search import GENERAL_QA
 from tts.text_to_speech import TTS
 
 # Configuration
@@ -30,10 +30,10 @@ class OctybotAgent:
         #Speech-to-Text
         self.audio_listener = AudioListener()
         self.wake_word = WakeWord(str(model.ensure_model("wake_word")[0]))
-        self.stt = SpeechToText(str(model.ensure_model("stt")[0]), "small") #Other Model "base", id = 1
+        self.stt = SpeechToText(str(model.ensure_model("stt")[1]), "base") #Other Model "base", id = 1
 
         #Fuzzy Search for fuzzy_search
-        self.diff = GENERAL_RAG(path_general)
+        self.diff = GENERAL_QA(path_general)
 
         #Text-to-Speech
         voice_id, decoder = model.voice_pair(voice)

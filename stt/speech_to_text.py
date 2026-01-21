@@ -54,7 +54,7 @@ class SpeechToText:
 
     
     def worker_loop(self, audio_bytes: bytes) -> Optional[str | None]:
-        """With this we can see if we recieve text or none"""
+        """With this we can see if we receive text or none"""
         if audio_bytes is None:
             return None
         try:
@@ -107,7 +107,7 @@ class SpeechToText:
 
     def stt_from_bytes (self, audio_bytes: bytes) -> Optional[str]:
         """
-        Convert bytes Int16→tensor float32 normalizado y ejecuta Whisper.
+        Convert bytes Int16→tensor float32, normalized and run Whisper.
         """
         if not audio_bytes: return None
 
@@ -157,7 +157,7 @@ if __name__ == "__main__":
     audio_listener.start_stream()
     
     try:
-        print("Este es el nodo de prueba del Speech to Text con Audio Listener y Wake Word \n" \
+        print("Este es el script de prueba del Speech to Text con Audio Listener y Wake Word \n" \
         "Debes decir La Palabara de activación, es 'ok Robot' - Presione Ctrl+C para salir\n")
         while True:
             result = audio_listener.read_frame(ww.frame_samples)

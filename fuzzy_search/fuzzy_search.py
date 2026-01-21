@@ -17,18 +17,18 @@ with SETTINGS.open("r", encoding="utf-8") as f:
     cfg = yaml.safe_load(f) or {}
 
 fuzzy_logic_accuracy_general = cfg.get("fuzzy_search", {}).get("fuzzy_logic_accuracy_general", 0.70)
-path_general = cfg.get("fuzzy_search", {}).get("path_general", "config/data/general_rag.json")
+path_general = cfg.get("fuzzy_search", {}).get("path_general", "config/data/general_QA.json")
 use_rapidfuzz = cfg.get("fuzzy_search", {}).get("use_rapidfuzz", True)
 
-class GENERAL_RAG:
+class GENERAL_QA:
     def __init__(self, path: str):
         self.log = logging.getLogger("Diffuse_Search")
         self.items: List[Dict[str,str]] = []
         self.load(path)
     
     def load(self, path: str) -> None:
-        """ Load the GENERAL_RAG from a JSON file or line-separated JSON objects """
-        self.log.info("Loading GENERAL_RAG...")
+        """ Load the GENERAL_QA from a JSON file or line-separated JSON objects """
+        self.log.info("Loading GENERAL_QA...")
         try:
             with open(path, "r", encoding="utf-8") as f:
                 txt = f.read().strip()
@@ -58,9 +58,9 @@ class GENERAL_RAG:
             self.log.error(f"Could not open fuzzy_search file: {e}")
     
     def lookup(self, query: str) -> Dict[str, Any]:
-        """ Simple exact or fuzzy match in the GENERAL_RAG. Returns dict with 'answer' and 'score' (0.0–1.0) """
+        """ Simple exact or fuzzy match in the GENERAL_QA. Returns dict with 'answer' and 'score' (0.0-1.0) """
         if not self.items:
-            return {"error":"general_rag_vacia","answer":"","score":fuzzy_logic_accuracy_general}
+            return {"error":"general_QA_vacia","answer":"","score":fuzzy_logic_accuracy_general}
         query = norm_text(query, False)
         best, best_s = None, 0.0
 
@@ -99,15 +99,15 @@ if "__main__" == __name__:
         cfg = yaml.safe_load(f) or {}
 
     fuzzy_logic_accuracy_general = cfg.get("fuzzy_search", {}).get("fuzzy_logic_accuracy_general", 0.70)
-    path_general = cfg.get("fuzzy_search", {}).get("path_general", "config/data/general_rag.json")
+    path_general = cfg.get("fuzzy_search", {}).get("path_general", "config/data/general_QA.json")
 
     logging.basicConfig(level=logging.INFO, format="[%(levelname)s %(asctime)s] [%(name)s] %(message)s")
     
-    print("Prueba de LLM 🤖:")
+    print("Prueba de búsqueda difusa:")
     print("Escribe una orden - Presiona (Ctrl+C para salir):")
     print("(Ejemplos: '¿Quién eres?', 'Cuéntame un chiste')")
 
-    app = GENERAL_RAG(path_general)
+    app = GENERAL_QA(path_general)
 
     try:
         while True:

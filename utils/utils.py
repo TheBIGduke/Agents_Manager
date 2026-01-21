@@ -1,5 +1,5 @@
 from pathlib import Path
-import os
+# import os
 import yaml
 import logging
 import sys
@@ -158,7 +158,7 @@ class LoadModel:
 
     def ensure_model(self, section: str) -> List[Path]:
         """ Ensure the model directory exists, return a List of paths or an error message """
-        base_dir = Path.home() / ".cache" / "octy"  
+        base_dir = Path.home() / ".cache" / "agents_manager"  
         models = []
         values = self.extract_section_models(section)
         for value in values:     

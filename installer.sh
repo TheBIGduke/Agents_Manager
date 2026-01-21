@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# installer.sh — One-shot installer for octy
+
+# installer.sh — One-shot installer
 # Tested on Ubuntu/Debian-like systems.
 
 set -euo pipefail
@@ -68,7 +69,7 @@ Next steps:
   2) Run the assistant:
        python -m main
 
-Tip: The cache lives in ~/.cache/octy
+Tip: The cache lives in ~/.cache/agent_manager
 ────────────────────────────────────────────────────────────
 EOS
 }

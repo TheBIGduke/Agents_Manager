@@ -1,7 +1,7 @@
 # --------------------------------------------------------------------------
 # GLOBAL CONFIGURATION SETTINGS
 # --------------------------------------------------------------------------
-# This file controls the behavior of the entire Agents_Manager package.
+# This file controls the behavior of the entire agents_manager package.
 # Adjust these parameters to tune performance, sensitivity, and functionality.
 # --------------------------------------------------------------------------
 
@@ -41,7 +41,7 @@ stt:
 # --- fuzzy_search & Information Retrieval ---
 fuzzy_search:
   fuzzy_logic_accuracy_general: 0.70    # Similarity threshold (0.0 -> 1.0) to match fuzzy_search entries
-  path_general: "config/data/general_rag.json" # Path to the knowledge base
+  path_general: "config/data/general_QA.json" # Path to the knowledge base
   use_rapidfuzz: true                  # False: Only if rapidfuzz is not available
 
 # --- Text-to-Speech (TTS) ---
@@ -53,4 +53,4 @@ tts:
   path_to_save: "tts/audios"    # Directory to save generated audio files
   name_of_outs: "test"          # Base filename for saved audios
   save_wav: false               # Flag to save audio files to disk
-  voice: 0                      # 1 = Octybot Medium, 0 = Claude High
+  voice: 1                      # 1 = Octybot Medium, 0 = Claude High (woman)

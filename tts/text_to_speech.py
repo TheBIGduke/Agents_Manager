@@ -177,7 +177,7 @@ if "__main__" == __name__:
     tts = TTS(str(model.ensure_model("tts")[voice_id]), str(model.ensure_model("tts")[decoder]))
 
     try: 
-        print("Este es el nodo de prueba del Text to Speech - Presione Ctrl+C para salir\n")
+        print("Este es el script de prueba del Text to Speech - Presione Ctrl+C para salir\n")
         while True:
             text = input("Escribe algo: ")
             get_audio = tts.synthesize(text)

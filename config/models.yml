@@ -1,4 +1,3 @@
-# Catalog that supports Octybot
 #WARNING: The name that your are going to assign, needs to be the same as the file that you want to call.
 # The download file is in utils folder as download_models.sh and the ensure_model or validation is in utils.py
 
@@ -15,12 +14,14 @@ tts:
 # WARNING: The order of the models is important, first the voice model and then the decoder model.
 # Unless the function voice_pair to select the voice is going to be useless
 
+  # Kid voice
   - name: es_419-Octybot-medium.onnx
     url: "https://drive.google.com/uc?export=download&id=1XwlJHb9tIEBkZP21uj-HKznvuJ-NSRJS"
     
   - name: es_419-Octybot-medium.onnx.json
     url: "https://drive.google.com/uc?export=download&id=1OdOvI7z5GBilV-jRNjmCR8F3G15q2Bx4"
 
+  # Woman voice
   - name: es_MX-claude-high.onnx
     url: https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_MX/claude/high/es_MX-claude-high.onnx?download=true
 

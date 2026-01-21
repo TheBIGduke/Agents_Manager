@@ -208,7 +208,7 @@ if "__main__" == __name__:
     audio_listener.start_stream()
 
     try: 
-        print("Este es el nodo de prueba del Wake Word con Audio Listener")
+        print("Este es el script de prueba del Wake Word con Audio Listener")
         print("La Palabara de activación es 'ok Robot' - Presione Ctrl+C para salir\n")
         while True:
             result = audio_listener.read_frame(ww.frame_samples)
