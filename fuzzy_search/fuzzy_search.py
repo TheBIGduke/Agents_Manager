@@ -89,6 +89,7 @@ if "__main__" == __name__:
     # Configuration
     from pathlib import Path
     import yaml
+    
 
     BASE_DIR = Path(__file__).parent.parent
     SETTINGS = BASE_DIR / "config" / "settings.yml"
