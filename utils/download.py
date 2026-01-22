@@ -62,7 +62,7 @@ def main():
     with open(MODELS_YAML, 'r', encoding='utf-8') as f:
         data = yaml.safe_load(f)
 
-    for section in ["stt", "wake_word", "tts"]:
+    for section in ["llm","stt", "wake_word", "tts"]:
         print(f"\n--- Processing {section} ---")
         items = data.get(section)
         if items:

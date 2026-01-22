@@ -7,15 +7,10 @@ import pyaudio
 import logging
 from pathlib import Path
 from piper.voice import PiperVoice, SynthesisConfig
-
+from utils.utils import SETTINGS
 # Configuration
 from pathlib import Path
 import yaml
-
-
-BASE_DIR = Path(__file__).parent.parent
-SETTINGS = BASE_DIR / "config" / "settings.yml"
-
 
 with SETTINGS.open("r", encoding="utf-8") as f:
     cfg = yaml.safe_load(f) or {}
@@ -162,12 +157,10 @@ if "__main__" == __name__:
     logging.basicConfig(level=logging.INFO, format="[%(levelname)s %(asctime)s] [%(name)s] %(message)s")
 
     from utils.utils import LoadModel
-
     # Configuration
-    from pathlib import Path
     import yaml
-    BASE_DIR = Path(__file__).parent.parent
-    SETTINGS = BASE_DIR / "config" / "settings.yml"
+    from utils.utils import SETTINGS
+
     with SETTINGS.open("r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f) or {}
     voice = cfg.get("tts", {}).get("voice", 1)

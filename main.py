@@ -5,14 +5,12 @@ from stt.audio_listener import AudioListener
 from stt.speech_to_text import SpeechToText
 from fuzzy_search.fuzzy_search import GENERAL_QA
 from tts.text_to_speech import TTS
+from utils.utils import SETTINGS
 
 # Configuration
-from pathlib import Path
 import yaml
-
-BASE_DIR = Path(__file__).parent
-SETTINGS = BASE_DIR / "config" / "settings.yml"
-
+import sys
+from pathlib import Path
 
 with SETTINGS.open("r", encoding="utf-8") as f:
     cfg = yaml.safe_load(f) or {}
@@ -20,6 +18,11 @@ with SETTINGS.open("r", encoding="utf-8") as f:
 fuzzy_logic_accuracy_general = cfg.get("fuzzy_search", {}).get("fuzzy_logic_accuracy_general", 0.70)
 path_general = cfg.get("fuzzy_search", {}).get("path_general", "config/data/general_rag.json")
 voice = cfg.get("tts", {}).get("voice", 1)
+local_llm_path = Path(cfg.get("llm", {}).get("repo_path_local_llm", "~/Local-LLM")).expanduser().resolve()
+sys.path.insert(0, str(local_llm_path))
+
+agent_selector = cfg.get("llm", {}).get("agent_selector", "only_fuzzy")  # "local" or "internet" or "only_fuzzy"
+
 
 class OctybotAgent:
     def __init__(self):
@@ -30,8 +33,8 @@ class OctybotAgent:
         #Speech-to-Text
         self.audio_listener = AudioListener()
         self.wake_word = WakeWord(str(model.ensure_model("wake_word")[0]))
-        self.stt = SpeechToText(str(model.ensure_model("stt")[1]), "base") #Other Model "base", id = 1
-
+        self.stt = SpeechToText(str(model.ensure_model("stt")[1]), "small") #Other Model "base", id = 1
+        print(f"STT Model Loaded: {model.ensure_model('stt')[1]}")
         #Fuzzy Search for fuzzy_search
         self.diff = GENERAL_QA(path_general)
 
@@ -40,10 +43,16 @@ class OctybotAgent:
         self.tts = TTS(str(model.ensure_model("tts")[voice_id]), str(model.ensure_model("tts")[decoder]))
 
         # Start the audio stream
-        self.audio_listener.start_stream()
-        
+        self.audio_listener.start_stream()   
+
+        self.agent_selector = model.select_agent(agent_selector, cfg, self.log)   
+
+        if self.agent_selector == "local":
+            from llm_main import LlmAgent
+            self.llm_agent = LlmAgent(model_path = str(model.ensure_model("llm")[0]))
+            self.log.info("Local LLM Agent loaded successfully.") 
+                               
         self.log.info("System Ready & Listening...")
-    
 
     def main(self):
         """" This is the state machine logic to work with the system.
@@ -72,6 +81,12 @@ class OctybotAgent:
         # Considering that this let you work as a state machine, so for example, if you want to the LLM that works with internet,
         # you can add the next steps without modifying the core system.
 
+        elif self.agent_selector == "local":
+
+            for out in self.llm_agent.ask(text_transcribed):
+                get_audio = self.tts.synthesize(out)
+                self.tts.play_audio_with_amplitude(get_audio)
+                                               
         else:
             get_audio = self.tts.synthesize("No se encontró una respuesta adecuada")
             self.tts.play_audio_with_amplitude(get_audio)

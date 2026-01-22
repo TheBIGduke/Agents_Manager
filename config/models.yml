@@ -1,6 +1,12 @@
 #WARNING: The name that your are going to assign, needs to be the same as the file that you want to call.
 # The download file is in utils folder as download_models.sh and the ensure_model or validation is in utils.py
 
+llm:
+#Qwen Models
+  - name: qwen2.5-3b-instruct-q4_k_m.gguf
+    url: https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct-q4_k_m.gguf?download=true
+
+
 stt:
 #Whisper models
   - name: base.pt

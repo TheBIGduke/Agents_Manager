@@ -40,7 +40,7 @@ stt:
 
 # --- fuzzy_search & Information Retrieval ---
 fuzzy_search:
-  fuzzy_logic_accuracy_general: 0.70    # Similarity threshold (0.0 -> 1.0) to match fuzzy_search entries
+  fuzzy_logic_accuracy_general: 0.8    # Similarity threshold (0.0 -> 1.0) to match fuzzy_search entries
   path_general: "config/data/general_QA.json" # Path to the knowledge base
   use_rapidfuzz: true                  # False: Only if rapidfuzz is not available
 
@@ -54,3 +54,10 @@ tts:
   name_of_outs: "test"          # Base filename for saved audios
   save_wav: false               # Flag to save audio files to disk
   voice: 1                      # 1 = Octybot Medium, 0 = Claude High (woman)
+
+# --- Large Language Model (LLM) ---
+llm:
+  repo_path_local_llm: "~/Local-LLM"  
+  repo_path_internet_agent: "~/Internet-Agent"
+  agent_selector: "local"       # "local" or "internet" or "only_fuzzy"
+

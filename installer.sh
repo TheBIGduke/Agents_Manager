@@ -34,6 +34,31 @@ install_apt() {
   ok "System packages installed."
 }
 
+sync_local_llm_repo() {
+  local REPO_URL="https://github.com/JossueE/Local-LLM.git"
+  local DEST_DIR="${HOME}/Local-LLM"
+
+  log "Syncing Local-LLM repo into ${DEST_DIR}…"
+
+  if [[ -d "${DEST_DIR}/.git" ]]; then
+    # Existing git repo: pull latest
+    ( cd "${DEST_DIR}" && git pull --rebase )
+    ok "Local-LLM updated via git pull."
+    return 0
+  fi
+
+  if [[ -d "${DEST_DIR}" && ! -d "${DEST_DIR}/.git" ]]; then
+    warn "${DEST_DIR} exists but is not a git repository. Skipping clone to avoid overwriting."
+    warn "If you want a fresh clone, rename or remove that folder and re-run the installer."
+    return 0
+  fi
+
+  # Folder does not exist: clone
+  git clone "${REPO_URL}" "${DEST_DIR}"
+  ok "Local-LLM cloned into ${DEST_DIR}."
+}
+
+
 create_venv_and_install() {
   log "Creating Python virtual environment…"
   python3 -m venv ".venv" || fail "venv creation failed."
@@ -77,6 +102,7 @@ EOS
 main() {
   require_sudo
   install_apt
+  sync_local_llm_repo
   # Note: We no longer need ensure_snapd or install_yq 
   # because we use python for downloading models.
   create_venv_and_install

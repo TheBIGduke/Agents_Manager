@@ -173,6 +173,49 @@ class LoadModel:
         base = 2 * (n - 1)
         return base, base + 1
     
+    def require_dir(self, path_str: str, name: str, log) -> Path | None:
+        """Return resolved Path if it exists and is a dir; otherwise log and return None."""
+        p = Path(path_str).expanduser().resolve()
+        if not p.exists():
+            log.error(f"{name} path does not exist: {p}")
+            return None
+        if not p.is_dir():
+            log.error(f"{name} path is not a directory: {p}")
+            return None
+        return p
+
+    def select_agent(self, agent_selector: str, cfg: dict, log) -> str:
+        """
+        Valid selectors: 'local', 'internet', 'only_fuzzy'
+        Falls back to 'only_fuzzy' on any validation error.
+        """
+        agent_selector = (agent_selector or "").strip().lower()
+
+        match agent_selector:
+            case "local":
+                local_path = cfg.get("llm", {}).get("repo_path_local_llm")  # ej: "~/Local-LLM"
+                if not local_path or self.require_dir(local_path, "local-llm.repo_path", log) is None:
+                    log.error("Missing config: local-llm.repo_path. Defaulting to 'only_fuzzy'.")
+                    return "only_fuzzy"
+                log.info("Local LLM is successfully loaded")
+                return "local"
+
+            case "internet":
+                internet_path = cfg.get("llm", {}).get("repo_path_internet_agent:")  # ajusta la key a tu YAML
+                if not internet_path or self.require_dir(internet_path, "internet-agent.repo_path", log) is None:
+                    log.error("Missing config: internet-agent.repo_path. Defaulting to 'only_fuzzy'.")
+                    return "only_fuzzy"
+                log.info("Internet-Agent is successfully loaded")
+                return "internet"
+
+            case "only_fuzzy":
+                log.info("Only Fuzzy-Search is successfully loaded")
+                return "only_fuzzy"
+
+            case _:
+                log.error(f"Invalid agent_selector: {agent_selector}. Defaulting to 'only_fuzzy'.")
+                return "only_fuzzy"
+    
 if "__main__" == __name__:
     configure_logging()
     ensure_model = LoadModel()

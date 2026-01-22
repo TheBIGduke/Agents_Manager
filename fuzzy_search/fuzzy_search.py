@@ -4,14 +4,10 @@ from typing import List, Dict, Any
 from difflib import SequenceMatcher
 from rapidfuzz import fuzz as rf_fuzz
 from .normalize_text import norm_text
+from utils.utils import SETTINGS
 
 # Configuration
-from pathlib import Path
 import yaml
-
-BASE_DIR = Path(__file__).parent.parent
-SETTINGS = BASE_DIR / "config" / "settings.yml"
-
 
 with SETTINGS.open("r", encoding="utf-8") as f:
     cfg = yaml.safe_load(f) or {}
@@ -85,15 +81,9 @@ class GENERAL_QA:
 
  #———— Example Usage ————
 if "__main__" == __name__:
-    
+    from utils.utils import SETTINGS
     # Configuration
-    from pathlib import Path
     import yaml
-    
-
-    BASE_DIR = Path(__file__).parent.parent
-    SETTINGS = BASE_DIR / "config" / "settings.yml"
-
 
     with SETTINGS.open("r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f) or {}

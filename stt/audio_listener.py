@@ -3,15 +3,11 @@ import sys
 from contextlib import contextmanager
 import pyaudio
 import logging
+from utils.utils import SETTINGS
 
 # Configuration
 from pathlib import Path
 import yaml
-
-
-BASE_DIR = Path(__file__).parent.parent
-SETTINGS = BASE_DIR / "config" / "settings.yml"
-
 
 with SETTINGS.open("r", encoding="utf-8") as f:
     cfg = yaml.safe_load(f) or {}
