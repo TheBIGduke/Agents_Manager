@@ -6,7 +6,7 @@ from pathlib import Path
 # Configuration
 BASE_DIR = Path(__file__).parent.parent
 MODELS_YAML = BASE_DIR / "config" / "models.yml"
-CACHE_DIR = Path.home() / ".cache" / "agents_manager"
+CACHE_DIR = Path.home() / ".agents_manager"
 
 def run_cmd(cmd):
     subprocess.run(cmd, check=True)

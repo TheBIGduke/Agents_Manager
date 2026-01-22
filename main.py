@@ -28,6 +28,7 @@ class OctybotAgent:
     def __init__(self):
         configure_logging() # <--- Initialize color logging
         self.log = logging.getLogger("System")
+        
         model = LoadModel()
         
         #Speech-to-Text
@@ -49,8 +50,14 @@ class OctybotAgent:
 
         if self.agent_selector == "local":
             from llm_main import LlmAgent
-            self.llm_agent = LlmAgent(model_path = str(model.ensure_model("llm")[0]))
+            self.llm_agent = LlmAgent(model_path = str(model.ensure_model("llm")[0]), log = logging.getLogger("Local-Agent"))
             self.log.info("Local LLM Agent loaded successfully.") 
+        
+        elif self.agent_selector == "internet":
+            # from internet_agent.llm_internet_agent import InternetAgent
+            # self.llm_agent = InternetAgent(model_path = str(model.ensure_model("llm")[1]), log = logging.getLogger("Internet-Agent"))
+            # self.log.info("Internet LLM Agent loaded successfully.")
+            pass
                                
         self.log.info("System Ready & Listening...")
 
@@ -86,6 +93,12 @@ class OctybotAgent:
             for out in self.llm_agent.ask(text_transcribed):
                 get_audio = self.tts.synthesize(out)
                 self.tts.play_audio_with_amplitude(get_audio)
+        
+        elif self.agent_selector == "internet":
+            # for out in self.llm_agent.ask(text_transcribed):
+            #     get_audio = self.tts.synthesize(out)
+            #     self.tts.play_audio_with_amplitude(get_audio)
+            pass
                                                
         else:
             get_audio = self.tts.synthesize("No se encontró una respuesta adecuada")

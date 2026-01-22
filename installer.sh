@@ -94,7 +94,7 @@ Next steps:
   2) Run the assistant:
        python -m main
 
-Tip: The cache lives in ~/.cache/agent_manager
+Tip: The cache lives in ~/.agent_manager
 ────────────────────────────────────────────────────────────
 EOS
 }

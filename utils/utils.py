@@ -5,7 +5,7 @@ import logging
 import sys
 import warnings
 from typing import Any, Dict, List, TypedDict
-
+from utils.download import CACHE_DIR
 # Configuration
 from pathlib import Path
 import yaml
@@ -37,7 +37,8 @@ MODULE_COLORS = {
     "System": "\033[38;5;93m",         # Purple
     "Wake_Word": "\033[38;5;213m",      # Pink
     "STT": "\033[38;5;85m",  # Turquoise
-    "LLM": "\033[96m",                  # Cyan
+    "Local-Agent": "\033[96m",                  # Cyan
+    "Internet-Agent": "\033[38;5;130m",  # Brown               
     "Diffuse_Search": "\033[36m",             # Cyan dim
     "TTS": "\033[38;5;178m", # Gold
     "Audio_Listener": "\033[38;5;208m",  # Orange
@@ -158,7 +159,7 @@ class LoadModel:
 
     def ensure_model(self, section: str) -> List[Path]:
         """ Ensure the model directory exists, return a List of paths or an error message """
-        base_dir = Path.home() / ".cache" / "agents_manager"  
+        base_dir = CACHE_DIR
         models = []
         values = self.extract_section_models(section)
         for value in values:     

@@ -32,7 +32,7 @@ stt:
   sample_rate: 16000            # DO NOT CHANGE - Required sample rate for Whisper
   listen_seconds: 5.0           # Max recording duration after wake word detection
   min_silence_ms_to_drain: 100  # Silence duration (ms) required to stop recording early
-  self_vocabulary: "DatIA Demographics" # Custom vocabulary hints for the model
+  self_vocabulary: "Octopy, Octybot" # Custom vocabulary hints for the model
 
   # Tuning Thresholds:
   no_speech_threshold: 0.5              # (0.0 -> 1.0) Higher = stricter
