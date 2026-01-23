@@ -8,6 +8,18 @@ It provides fast, robust approximate matching over a local knowledge base, with 
 
 ---
 
+## 📝 Flowchart
+<figure style="margin:0; text-align:center; border:1px solid #eaecef; padding:6px; border-radius:6px;">
+  <img src="docs/images/Agents-Manager.svg"
+       alt="Flow Chart"
+       style="max-width:100%; height:auto;" />
+  <figcaption style="font-size:0.9em; color:#6a737d; margin-top:4px;">
+    View the full Pipeline
+  </figcaption>
+</figure>
+
+---
+
 ## Table of Contents
 
 - [Installation](#installation)
