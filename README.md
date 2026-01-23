@@ -111,6 +111,13 @@ git clone https://github.com/JossueE/Local-LLM
 
 All runtime settings are defined in **`config/settings.yml`**. These are plain Python constants—edit the file and restart your scripts to apply changes.
 
+> [!IMPORTANT]
+> If you want to modify the **`config/settings.yml`** without problems of **git merge**
+> ```bash
+> cd agents_manager
+> git config --global merge.ours.driver true
+> ```
+
 ### Model Catalog (`config/models.yml`)
 
 Define which models the system uses (LLM, STT, TTS, wake word) along with their URLs and sample rates.
