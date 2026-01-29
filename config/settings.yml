@@ -58,6 +58,6 @@ tts:
 
 # --- Large Language Model (LLM) ---
 llm:
-  repo_path_local_llm: "~/Local-LLM"  
-  repo_path_internet_agent: "~/Internet-Agent"
-  agent_selector: "local"       # "local" or "internet" or "only_fuzzy"
+  repo_path_local_llm: "~/local_agent_module"  
+  repo_path_internet_agent: "~/internet_agent_module"
+  agent_selector: "internet"       # "local" or "internet" or "only_fuzzy"

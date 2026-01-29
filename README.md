@@ -59,7 +59,8 @@ cd agents_manager
 bash installer.sh
 ``` 
 > [!NOTE]
-> The installer also is going to download the [Local-LLM](https://github.com/JossueE/Local-LLM)
+> The installer also is going to download the [local_agent_module](https://github.com/JossueE/Local-LLM)
+> The installer also is going to download the [internet_agent_module](...)
 
 #### For manual installation and setup:
 
@@ -95,17 +96,23 @@ To verify models were correctly downloaded or to download models:
 The script installs everything into your cache directory (`~/.cache/agents_manager`).
 
 ```bash
-# To install the Local-LLM module
+# To install the local_agent_module module
 cd 
 git clone https://github.com/JossueE/Local-LLM
 ```
 
+```bash
+# To install the internet_agent_module module
+cd 
+git clone https://github.com/JossueE/Local-LLM
+```
 ---
 
 <h2 id="configuration">Configuration</h2>
 
 > [!WARNING]
 > Audio models can be large. Ensure you have enough disk space and RAM/VRAM for your chosen settings.
+> The specific configuration for `local_agent_module` and `internet_agent_module`
 
 ### General Settings (`config/settings.py`)
 
@@ -115,9 +122,9 @@ All runtime settings are defined in **`config/settings.yml`**. These are plain P
 
 Define which models the system uses (LLM, STT, TTS, wake word) along with their URLs and sample rates.
 
-### Data for Common Questions (`config/data/general_rag.json`)
+### Data for Common Questions (`config/data/general_QA.json`)
 
-All general questions and answers are stored in `config/data/general_rag.json`. Define new questions in the `triggers` array and provide the corresponding `answer`.
+All general questions and answers are stored in `config/data/general_QA.json`. Define new questions in the `triggers` array and provide the corresponding `answer`.
 
 ---
 

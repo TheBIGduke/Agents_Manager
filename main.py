@@ -18,11 +18,10 @@ with SETTINGS.open("r", encoding="utf-8") as f:
 fuzzy_logic_accuracy_general = cfg.get("fuzzy_search", {}).get("fuzzy_logic_accuracy_general", 0.70)
 path_general = cfg.get("fuzzy_search", {}).get("path_general", "config/data/general_rag.json")
 voice = cfg.get("tts", {}).get("voice", 1)
-local_llm_path = Path(cfg.get("llm", {}).get("repo_path_local_llm", "~/Local-LLM")).expanduser().resolve()
-sys.path.insert(0, str(local_llm_path))
+local_llm_path = Path(cfg.get("llm", {}).get("repo_path_local_llm", "~/local_agent_module")).expanduser().resolve()
+internet_llm_path = Path(cfg.get("llm", {}).get("repo_path_internet_agent", "~/internet_agent_module")).expanduser().resolve()
 agent_selector = cfg.get("llm", {}).get("agent_selector", "only_fuzzy")  # "local" or "internet" or "only_fuzzy"
 debug_mode = cfg.get("debug_mode", False)
-
 
 class OctybotAgent:
     def __init__(self):
@@ -49,6 +48,7 @@ class OctybotAgent:
         self.agent_selector = model.select_agent(agent_selector, cfg, self.log)   
 
         if self.agent_selector == "local":
+            sys.path.insert(0, str(local_llm_path))
             from llm_main import LlmAgent
             local_llm_log = logging.getLogger("Local-Agent")
             local_llm_log.setLevel(self.level) # ---------------------> This let us to pass the same debug mode to the llm agent
@@ -56,10 +56,12 @@ class OctybotAgent:
             self.log.info("Local LLM Agent loaded successfully.") 
         
         elif self.agent_selector == "internet":
-            # from internet_agent.llm_internet_agent import InternetAgent
-            # self.llm_agent = InternetAgent(model_path = str(model.ensure_model("llm")[1]), log = logging.getLogger("Internet-Agent"))
-            # self.log.info("Internet LLM Agent loaded successfully.")
-            pass
+            sys.path.insert(0, str(internet_llm_path))
+            from internet_main import internet_agent
+            internet_llm_log = logging.getLogger("Internet-Agent")
+            internet_llm_log.setLevel(self.level)
+            self.internet_agent = internet_agent(log = internet_llm_log, debug=debug_mode)
+            self.log.info("Internet LLM Agent loaded successfully.") 
                                
         self.log.info("System Ready & Listening...")
 
@@ -97,10 +99,10 @@ class OctybotAgent:
                 self.tts.play_audio_with_amplitude(get_audio)
         
         elif self.agent_selector == "internet":
-            # for out in self.llm_agent.ask(text_transcribed):
-            #     get_audio = self.tts.synthesize(out)
-            #     self.tts.play_audio_with_amplitude(get_audio)
-            pass
+            out = self.internet_agent.send_message(text_transcribed)
+            get_audio = self.tts.synthesize(out)
+            self.tts.play_audio_with_amplitude(get_audio)
+            
                                                
         else:
             get_audio = self.tts.synthesize("No se encontró una respuesta adecuada")

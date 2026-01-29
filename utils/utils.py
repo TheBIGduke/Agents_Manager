@@ -202,7 +202,7 @@ class LoadModel:
                 return "local"
 
             case "internet":
-                internet_path = cfg.get("llm", {}).get("repo_path_internet_agent:")  # ajusta la key a tu YAML
+                internet_path = cfg.get("llm", {}).get("repo_path_internet_agent")  # ej: "~/internet_agent_module"
                 if not internet_path or self.require_dir(internet_path, "internet-agent.repo_path", log) is None:
                     log.error("Missing config: internet-agent.repo_path. Defaulting to 'only_fuzzy'.")
                     return "only_fuzzy"
