@@ -91,7 +91,7 @@ download_models() {
 
 create_cache_directory(){
   # Create RAG_documents directory if it doesn't exist (ignore if it does)
-  mkdir -p "$HOME/.agents_manager/internet_agent/RAG_documents"
+  mkdir -p "$HOME/.agents_manager/online_agent/RAG_documents"
 
 }
 
@@ -108,8 +108,8 @@ Next steps:
   2) Run the assistant:
        python -m main
   
-  3) Remember to add your RAG for internet_agent_module
-     in PATH: ~/.agents_manager/internet_agent/RAG_documents
+  3) Remember to add your RAG for online_agent_module
+     in PATH: ~/.agents_manager/online_agent/RAG_documents
 
 Tip: The cache lives in ~/.agent_manager
 ────────────────────────────────────────────────────────────
@@ -120,7 +120,7 @@ main() {
   require_sudo
   install_apt
   sync_repo "https://github.com/JossueE/Local-LLM.git" "$HOME/local_agent_module"
-  sync_repo "https://springlabsdevs.net/mecatronica/digital-signage/agent_core.git" "$HOME/internet_agent_module"
+  sync_repo "https://springlabsdevs.net/mecatronica/digital-signage/agent_core.git" "$HOME/online_agent_module"
   # Note: We no longer need ensure_snapd or install_yq 
   # because we use python for downloading models.
   create_venv_and_install

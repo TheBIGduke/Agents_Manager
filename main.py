@@ -19,8 +19,8 @@ fuzzy_logic_accuracy_general = cfg.get("fuzzy_search", {}).get("fuzzy_logic_accu
 path_general = cfg.get("fuzzy_search", {}).get("path_general", "config/data/general_rag.json")
 voice = cfg.get("tts", {}).get("voice", 1)
 local_llm_path = Path(cfg.get("llm", {}).get("repo_path_local_llm", "~/local_agent_module")).expanduser().resolve()
-internet_llm_path = Path(cfg.get("llm", {}).get("repo_path_internet_agent", "~/internet_agent_module")).expanduser().resolve()
-agent_selector = cfg.get("llm", {}).get("agent_selector", "only_fuzzy")  # "local" or "internet" or "only_fuzzy"
+online_llm_path = Path(cfg.get("llm", {}).get("repo_path_online_agent", "~/online_agent_module")).expanduser().resolve()
+agent_selector = cfg.get("llm", {}).get("agent_selector", "only_fuzzy")  # "local" or "online" or "only_fuzzy"
 debug_mode = cfg.get("debug_mode", False)
 
 class OctybotAgent:
@@ -55,13 +55,13 @@ class OctybotAgent:
             self.llm_agent = LlmAgent(model_path = str(model.ensure_model("llm")[0]), log = local_llm_log, debug=debug_mode)
             self.log.info("Local LLM Agent loaded successfully.") 
         
-        elif self.agent_selector == "internet":
-            sys.path.insert(0, str(internet_llm_path))
-            from internet_main import internet_agent
-            internet_llm_log = logging.getLogger("Internet-Agent")
-            internet_llm_log.setLevel(self.level)
-            self.internet_agent = internet_agent(log = internet_llm_log, debug=debug_mode)
-            self.log.info("Internet LLM Agent loaded successfully.") 
+        elif self.agent_selector == "online":
+            sys.path.insert(0, str(online_llm_path))
+            from online_main import online_agent
+            online_llm_log = logging.getLogger("online-Agent")
+            online_llm_log.setLevel(self.level)
+            self.online_agent = online_agent(log = online_llm_log, debug=debug_mode)
+            self.log.info("online LLM Agent loaded successfully.") 
                                
         self.log.info("System Ready & Listening...")
 
@@ -89,7 +89,7 @@ class OctybotAgent:
             self.tts.play_audio_with_amplitude(get_audio)
 
         # IMPORTANT:  In this case the exception "else" is added in the main, so it  gives flexibility to add custom next steps to the system.
-        # Considering that this let you work as a state machine, so for example, if you want to the LLM that works with internet,
+        # Considering that this let you work as a state machine, so for example, if you want to the LLM that works with online,
         # you can add the next steps without modifying the core system.
 
         elif self.agent_selector == "local":
@@ -98,8 +98,8 @@ class OctybotAgent:
                 get_audio = self.tts.synthesize(out)
                 self.tts.play_audio_with_amplitude(get_audio)
         
-        elif self.agent_selector == "internet":
-            out = self.internet_agent.send_message(text_transcribed)
+        elif self.agent_selector == "online":
+            out = self.online_agent.send_message(text_transcribed)
             get_audio = self.tts.synthesize(out)
             self.tts.play_audio_with_amplitude(get_audio)
             

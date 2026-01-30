@@ -38,7 +38,7 @@ MODULE_COLORS = {
     "Wake_Word": "\033[38;5;213m",      # Pink
     "STT": "\033[38;5;85m",  # Turquoise
     "Local-Agent": "\033[96m",                  # Cyan
-    "Internet-Agent": "\033[38;5;130m",  # Brown               
+    "online-Agent": "\033[38;5;130m",  # Brown               
     "Diffuse_Search": "\033[36m",             # Cyan dim
     "TTS": "\033[38;5;178m", # Gold
     "Audio_Listener": "\033[38;5;208m",  # Orange
@@ -187,7 +187,7 @@ class LoadModel:
 
     def select_agent(self, agent_selector: str, cfg: dict, log) -> str:
         """
-        Valid selectors: 'local', 'internet', 'only_fuzzy'
+        Valid selectors: 'local', 'online', 'only_fuzzy'
         Falls back to 'only_fuzzy' on any validation error.
         """
         agent_selector = (agent_selector or "").strip().lower()
@@ -201,13 +201,13 @@ class LoadModel:
                 log.info("Local LLM is successfully loaded")
                 return "local"
 
-            case "internet":
-                internet_path = cfg.get("llm", {}).get("repo_path_internet_agent")  # ej: "~/internet_agent_module"
-                if not internet_path or self.require_dir(internet_path, "internet-agent.repo_path", log) is None:
-                    log.error("Missing config: internet-agent.repo_path. Defaulting to 'only_fuzzy'.")
+            case "online":
+                online_path = cfg.get("llm", {}).get("repo_path_online_agent")  # ej: "~/online_agent_module"
+                if not online_path or self.require_dir(online_path, "online-agent.repo_path", log) is None:
+                    log.error("Missing config: online-agent.repo_path. Defaulting to 'only_fuzzy'.")
                     return "only_fuzzy"
-                log.info("Internet-Agent is successfully loaded")
-                return "internet"
+                log.info("online-Agent is successfully loaded")
+                return "online"
 
             case "only_fuzzy":
                 log.info("Only Fuzzy-Search is successfully loaded")

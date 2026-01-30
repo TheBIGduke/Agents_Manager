@@ -60,7 +60,7 @@ bash installer.sh
 ``` 
 > [!NOTE]
 > The installer also is going to download the [local_agent_module](https://github.com/JossueE/Local-LLM)
-> The installer also is going to download the [internet_agent_module](...)
+> The installer also is going to download the [online_agent_module](...)
 
 #### For manual installation and setup:
 
@@ -102,7 +102,7 @@ git clone https://github.com/JossueE/Local-LLM
 ```
 
 ```bash
-# To install the internet_agent_module module
+# To install the online_agent_module module
 cd 
 git clone https://github.com/JossueE/Local-LLM
 ```
@@ -112,7 +112,7 @@ git clone https://github.com/JossueE/Local-LLM
 
 > [!WARNING]
 > Audio models can be large. Ensure you have enough disk space and RAM/VRAM for your chosen settings.
-> The specific configuration for `local_agent_module` and `internet_agent_module`
+> The specific configuration for `local_agent_module` and `online_agent_module`
 
 ### General Settings (`config/settings.py`)
 
@@ -215,7 +215,7 @@ Your input text is normalized (`norm_text`) before matching (lowercase, accents 
 
 - `como te llamas -> Mi nombre es Octybot.`
 - `quien eres -> Soy un agente virtual con búsqueda difusa en una base de conocimiento local.`
-- `que puedes hacer -> Puedo responder preguntas usando una base de conocimiento local (fuzzy_search) sin conexión a internet.`
+- `que puedes hacer -> Puedo responder preguntas usando una base de conocimiento local (fuzzy_search) sin conexión a online.`
 - `hola -> ¡Hola! ¿En qué puedo ayudarte?`
 - `gracias -> ¡De nada!`
 
