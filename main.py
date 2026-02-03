@@ -1,4 +1,7 @@
 import logging
+import json
+import threading
+
 from utils.utils import LoadModel, configure_logging
 from stt.wake_word import WakeWord
 from stt.audio_listener import AudioListener
@@ -6,6 +9,7 @@ from stt.speech_to_text import SpeechToText
 from fuzzy_search.fuzzy_search import GENERAL_QA
 from tts.text_to_speech import TTS
 from utils.utils import SETTINGS
+from websocket import create_connection
 
 # Configuration
 import yaml
@@ -22,6 +26,17 @@ local_llm_path = Path(cfg.get("llm", {}).get("repo_path_local_llm", "~/local_age
 online_llm_path = Path(cfg.get("llm", {}).get("repo_path_online_agent", "~/online_agent_module")).expanduser().resolve()
 agent_selector = cfg.get("llm", {}).get("agent_selector", "only_fuzzy")  # "local" or "online" or "only_fuzzy"
 debug_mode = cfg.get("debug_mode", False)
+
+def send_face_mood():
+    """ Sends JSON payload to audioServer.py """
+    def _send():
+        try:
+            ws = create_connection("ws://localhost:8000")
+            ws.send(json.dumps({"type": "mood", "mood": mood}))
+            ws.close()
+        except Exception as e:
+            print(f"[FaceSync] Error sending mood '{mood}': {e}")
+    threading.Thread(target=_send, daemon=True).start()
 
 class OctybotAgent:
     def __init__(self):

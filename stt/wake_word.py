@@ -1,6 +1,10 @@
 from __future__ import annotations
 import logging, json
 
+import json
+import threading
+from websocket import create_connection
+
 # --- SILENCE WEBRTCVAD WARNING ---
 import warnings
 # Suppress the specific pkg_resources warning from webrtcvad
@@ -29,11 +33,17 @@ sample_rate = cfg.get("audio_listener", {}).get("sample_rate", 16000)
 channels = cfg.get("audio_listener", {}).get("channels", 1)
 debug_mode = cfg.get("debug_mode", False)
 
-# if AVATAR:
-#     import webbrowser, subprocess, sys
-#     from pathlib import Path
-#     from avatar.avatar_server import send_mode_sync
 
+def send_face_mood():
+    """ Sends JSON payload to audioServer.py """
+    def _send():
+        try:
+            ws = create_connection("ws://localhost:8000")
+            ws.send(json.dumps({"type": "mood", "mood": mood}))
+            ws.close()
+        except Exception as e:
+            print(f"[FaceSync] Error sending mood '{mood}': {e}")
+    threading.Thread(target=_send, daemon=True).start()
 
 class WakeWord:
     def __init__(self, model_path:str, log=None, debug:bool = debug_mode) -> None:
@@ -75,11 +85,6 @@ class WakeWord:
         self.size = 0
         self.max = int(self.listen_seconds * self.sample_rate * channels * 2) #2 bytes per int16 sample
         self.max_2 = int(1 * self.sample_rate * channels * 2) #2 bytes per int16 sample
-
-        # #Initialize Avatar Server if needed
-        # if AVATAR:
-        #     subprocess.Popen([sys.executable, "-m", "avatar.avatar_server"], stdin=subprocess.DEVNULL, stdout = subprocess.PIPE, stderr = subprocess.PIPE, text=True)
-        #     webbrowser.open(Path("avatar/OctoV.html").resolve().as_uri(), new=0, autoraise=True)
 
     def wake_word_detector(self, frame: bytes) -> None | bytes:
         """Process one 10 ms PCM int16 mono frame for wake-word detection."""
