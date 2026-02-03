@@ -115,6 +115,8 @@ class WakeWord:
             text = (result.get("text") or "").lower().strip()
             if text and self.matches_wake(text):
                 self.log.info(f"Wake word detected: '{text}'")
+                # Listening to the user Mood
+                send_face_mood("Escuchando")
                 if not self.listening_confirm:           
                     self.listening_confirm = True
                     self.listening = True   
@@ -128,7 +130,8 @@ class WakeWord:
                 if self.matches_wake(partial): #If something looks like a partial detection     
                     if not self.listening: 
                         self.listening = True
-                        # send_mode_sync(mode = "USER", as_json=False) if AVATAR else None
+                        # Wake word dectected Mood
+                        send_face_mood("Alerta")
                         drained = self.buffer_add(frame) if flag else None
                         if drained is not None:
                             return drained
@@ -141,7 +144,6 @@ class WakeWord:
                 else:
                     self.partial_hits = 0
 
-    
     def buffer_add(self, frame: bytes) -> None | bytes:
         with self.lock:
             self.buffer.append(frame)
