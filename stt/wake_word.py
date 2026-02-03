@@ -149,6 +149,7 @@ class WakeWord:
         """ Clear the audio buffer and reset flags. """
         self.listening = False
         self.listening_confirm = False
+        send_face_mood("Neutral")
         with self.lock:
             self.buffer.clear()
             self.size = 0
