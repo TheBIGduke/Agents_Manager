@@ -10,6 +10,7 @@ from fuzzy_search.fuzzy_search import GENERAL_QA
 from tts.text_to_speech import TTS
 from utils.utils import SETTINGS
 from websocket import create_connection
+from utils.utils import send_face_mood
 
 # Configuration
 import yaml
@@ -27,16 +28,6 @@ online_llm_path = Path(cfg.get("llm", {}).get("repo_path_online_agent", "~/onlin
 agent_selector = cfg.get("llm", {}).get("agent_selector", "only_fuzzy")  # "local" or "online" or "only_fuzzy"
 debug_mode = cfg.get("debug_mode", False)
 
-def send_face_mood():
-    """ Sends JSON payload to audioServer.py """
-    def _send():
-        try:
-            ws = create_connection("ws://localhost:8000")
-            ws.send(json.dumps({"type": "mood", "mood": mood}))
-            ws.close()
-        except Exception as e:
-            print(f"[FaceSync] Error sending mood '{mood}': {e}")
-    threading.Thread(target=_send, daemon=True).start()
 
 class OctybotAgent:
     def __init__(self):
@@ -94,33 +85,43 @@ class OctybotAgent:
         while text_transcribed == None:
             audio_capture = self.audio_listener.read_frame(self.wake_word.frame_samples)
             wake_word_buffer =  self.wake_word.wake_word_detector(audio_capture)
+
+            if wake_word_buffer is not None:
+                send_face_mood("Pensando")
             text_transcribed = self.stt.worker_loop(wake_word_buffer)
 
+        # Processing the request Mood
         out = self.diff.best_hit(self.diff.lookup(text_transcribed))
         
         if out.get('answer') and out.get('score', 0.0) >= fuzzy_logic_accuracy_general:
             out = out.get('answer')
             get_audio = self.tts.synthesize(out)
+            send_face_mood("Neutral")
             self.tts.play_audio_with_amplitude(get_audio)
+
 
         # IMPORTANT:  In this case the exception "else" is added in the main, so it  gives flexibility to add custom next steps to the system.
         # Considering that this let you work as a state machine, so for example, if you want to the LLM that works with online,
         # you can add the next steps without modifying the core system.
 
         elif self.agent_selector == "local":
-
             for out in self.llm_agent.ask(text_transcribed):
+                if out in self.llm_agent.ask(text_transcribed):
+                    send_face_mood("Neutral")
+                
                 get_audio = self.tts.synthesize(out)
                 self.tts.play_audio_with_amplitude(get_audio)
         
         elif self.agent_selector == "online":
             out = self.online_agent.send_message(text_transcribed)
             get_audio = self.tts.synthesize(out)
+            send_face_mood("Neutral")
             self.tts.play_audio_with_amplitude(get_audio)
             
                                                
         else:
             get_audio = self.tts.synthesize("No se encontró una respuesta adecuada")
+            send_face_mood("Neutral")
             self.tts.play_audio_with_amplitude(get_audio)
             self.log.info("No se encontró una respuesta adecuada.")
 

@@ -16,6 +16,7 @@ import vosk
 import threading
 from collections import deque
 from utils.utils import SETTINGS
+from utils.utils import send_face_mood
 
 # Configuration
 import yaml
@@ -33,17 +34,6 @@ sample_rate = cfg.get("audio_listener", {}).get("sample_rate", 16000)
 channels = cfg.get("audio_listener", {}).get("channels", 1)
 debug_mode = cfg.get("debug_mode", False)
 
-
-def send_face_mood():
-    """ Sends JSON payload to audioServer.py """
-    def _send():
-        try:
-            ws = create_connection("ws://localhost:8000")
-            ws.send(json.dumps({"type": "mood", "mood": mood}))
-            ws.close()
-        except Exception as e:
-            print(f"[FaceSync] Error sending mood '{mood}': {e}")
-    threading.Thread(target=_send, daemon=True).start()
 
 class WakeWord:
     def __init__(self, model_path:str, log=None, debug:bool = debug_mode) -> None:
@@ -93,7 +83,6 @@ class WakeWord:
         if (self.listening or self.listening_confirm) and flag: #If the system is listening or have a confirmation i save the info
             drained = self.buffer_add(frame)  
             if drained is not None:
-                # send_mode_sync(mode = "TTS", as_json=False) if AVATAR else None
                 self.log.debug("Max buffer size reached, draining buffer...")
                 return drained
         
@@ -102,7 +91,6 @@ class WakeWord:
                 self.partial_hits -= 1         
             if (self.listening or self.listening_confirm) and self.partial_hits <= -self.silence_frames_to_drain: #If is listening and the voice pass the umbral of silence
                 self.partial_hits = 0
-                # send_mode_sync(mode = "TTS", as_json=False) if AVATAR else None
                 if self.listening_confirm and self.size > 0: # If the wake_word is confirm and something is in the buffer
                     self.log.debug("Wake word and audio are confirm, Sending information...")
                     return self.buffer_drain()
@@ -122,7 +110,8 @@ class WakeWord:
                     self.listening = True   
                 self.partial_hits = 0
                 return
-            self.partial_hits = 0
+            self.partial_hits = 0 
+
 
         else:
             partial = json.loads(self.rec.PartialResult() or "{}").get("partial", "").lower().strip()
@@ -143,6 +132,7 @@ class WakeWord:
                         return
                 else:
                     self.partial_hits = 0
+                    send_face_mood("Neutral")
 
     def buffer_add(self, frame: bytes) -> None | bytes:
         with self.lock:
@@ -153,7 +143,6 @@ class WakeWord:
         if self.size > self.max_2 and self.listening and not self.listening_confirm:
             self.log.debug("Detection wasn't confirmed, clearing buffer...")
             self.buffer_clear()
-            # send_mode_sync(mode = "TTS", as_json=False) if AVATAR else None
         return None
 
     def buffer_clear(self) -> None:

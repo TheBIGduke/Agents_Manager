@@ -10,6 +10,10 @@ from utils.download import CACHE_DIR
 from pathlib import Path
 import yaml
 
+import threading
+import json
+from websocket import create_connection
+
 BASE_DIR = Path(__file__).parent.parent
 SETTINGS = BASE_DIR / "config" / "settings.yml"
 
@@ -46,18 +50,18 @@ MODULE_COLORS = {
 
 class ColoredFormatter(logging.Formatter):
     def format(self, record):
-        # 1. Timestamp Color
+        # Timestamp Color
         asctime = self.formatTime(record, self.datefmt)
         
-        # 2. Module Name Color
+        # Module Name Color
         module_color = MODULE_COLORS.get(record.name, "\033[37m") # Default white
         module_name = f"{module_color}[{record.name}]{RESET}"
         
-        # 3. Level Name Color
+        # Level Name Color
         level_color = LEVEL_COLORS.get(record.levelname, RESET)
         level_name = f"{level_color}{record.levelname}{RESET}"
         
-        # 4. Message Color (Error messages get red text, others standard)
+        # Message Color (Error messages get red text, others standard)
         msg_color = level_color if record.levelno >= logging.WARNING else RESET
         message = f"{msg_color}{record.getMessage()}{RESET}"
 
@@ -72,19 +76,19 @@ class WarningLogRouter(logging.Filter):
     def filter(self, record):
         msg = record.getMessage()
         
-        # 1. Route Whisper CPU warning to 'STT' and clean message
+        # Route Whisper CPU warning to 'STT' and clean message
         if "Performing inference on CPU when CUDA is available" in msg:
             record.name = "STT"
             record.msg = "Performing inference on CPU when CUDA is available"
             record.args = () # Clear any formatting args
             
-        # 2. Route Numba TBB warning to 'System' and clean message
+        # Route Numba TBB warning to 'System' and clean message
         elif "The TBB threading layer requires TBB version" in msg or "he TBB threading layer requires" in msg:
             record.name = "System"
             record.msg = "The TBB threading layer requires TBB version 2021 update 6 or later i.e., TBB_INTERFACE_VERSION >= 12060. Found TBB_INTERFACE_VERSION = 12050. The TBB threading layer is disabled."
             record.args = () # Clear any formatting args
 
-        # 3. Route Llama context warning to 'LLM_Data' and set as INFO
+        # Route Llama context warning to 'LLM_Data' and set as INFO
         elif "llama_context" in msg:
             record.name = "LLM_Data"
             record.levelno = logging.INFO
@@ -122,7 +126,17 @@ def configure_logging():
     # Suppress pkg_resources deprecation warning (often from webrtcvad)
     warnings.filterwarnings("ignore", message=".*pkg_resources is deprecated.*")
 
-# --- EXISTING CODE BELOW ---
+def send_face_mood(mood):
+    """ Sends JSON payload to audioServer.py """
+    def _send():
+        try:
+            ws = create_connection("ws://localhost:8760")
+            ws.send(json.dumps({"type": "mood", "mood": mood}))
+            ws.close()
+        except Exception as e:
+            print(f"[FaceSync] Error sending mood '{mood}': {e}")
+    threading.Thread(target=_send, daemon=True).start()
+
 
 def load_yaml() -> Dict[str, Any]:
     """Is for load yaml files, but we use it just for models"""

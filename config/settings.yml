@@ -60,4 +60,4 @@ tts:
 llm:
   repo_path_local_llm: "~/local_agent_module"  
   repo_path_online_agent: "~/online_agent_module"
-  agent_selector: "online"       # "local" or "online" or "only_fuzzy"
+  agent_selector: "only_fuzzy"       # "local" or "online" or "only_fuzzy"
